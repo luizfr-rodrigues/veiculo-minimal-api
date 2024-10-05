@@ -18,6 +18,18 @@ namespace veiculos_minimal_api.Infraestrutura.Db
 
         public DbSet<Administrador> Administradores { get; set; } = default!;
 
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Administrador>().HasData(
+                new Administrador {
+                    Id = 1,
+                    Email = "administrador@teste.com",
+                    Senha = "123456",
+                    Perfil = "Adm"
+                }
+            );
+        }
+        
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if(!optionsBuilder.IsConfigured)
