@@ -1,6 +1,17 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using veiculos_minimal_api.Dominio.DTOs;
+using veiculos_minimal_api.Infraestrutura.Db;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddDbContext<DbContexto>(options => {
+    options.UseMySql(
+        builder.Configuration.GetConnectionString("MySql"),
+        ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("MySql"))
+    );
+});
+
 var app = builder.Build();
 
 app.MapGet("/", () => "Hello World!");
