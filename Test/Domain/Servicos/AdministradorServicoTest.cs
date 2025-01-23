@@ -1,71 +1,122 @@
-using System.Reflection;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
+using veiculos_minimal_api.Dominio.DTOs;
 using veiculos_minimal_api.Dominio.Entidades;
 using veiculos_minimal_api.Dominio.Servicos;
-using veiculos_minimal_api.Infraestrutura.Db;
 
-namespace Test.Domain.Entidades;
+namespace Test.Domain.Servicos;
 
 [TestClass]
-public class AdministradorServicoTest
+public class AdministradorServicoTest : ServicoBaseTest
 {
-    private DbContexto CriarContextoDeTeste()
+    private AdministradorServico _administradorServico; 
+    public AdministradorServicoTest() : base()
     {
-        var assemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-        var path = Path.GetFullPath(Path.Combine(assemblyPath ?? "", "..", "..", ".."));
-
-        var builder = new ConfigurationBuilder()
-            .SetBasePath(path ?? Directory.GetCurrentDirectory())
-            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-            .AddEnvironmentVariables();
-
-        var configuration = builder.Build();
-
-        return new DbContexto(configuration);
+        _administradorServico = new AdministradorServico(_contexto);
     }
-
-
-    [TestMethod]
-    public void TestandoSalvarAdministrador()
+    private void TruncarTabelaAdministradores()
     {
-        // Arrange
-        var context = CriarContextoDeTeste();
-        context.Database.ExecuteSqlRaw("TRUNCATE TABLE Administradores");
-
+        TruncarTabela("Administradores");
+    }    
+    private Administrador CriarNovoAdministradorParaTeste()
+    {
         var adm = new Administrador();
         adm.Email = "teste@teste.com";
         adm.Senha = "teste";
         adm.Perfil = "Adm";
 
-        var administradorServico = new AdministradorServico(context);
-
-        // Act
-        administradorServico.Incluir(adm);
-
-        // Assert
-        Assert.AreEqual(1, administradorServico.Todos(1).Count());
-    }
+        return adm;            
+    }     
 
     [TestMethod]
-    public void TestandoBuscaPorId()
+    public void TestarBuscaPorIdAdministrador()
     {
         // Arrange
-        var context = CriarContextoDeTeste();
-        context.Database.ExecuteSqlRaw("TRUNCATE TABLE Administradores");
+        TruncarTabelaAdministradores();
 
-        var adm = new Administrador();
-        adm.Email = "teste@teste.com";
-        adm.Senha = "teste";
-        adm.Perfil = "Adm";
+        var adm = CriarNovoAdministradorParaTeste();
+        _administradorServico.Incluir(adm);
 
-        var administradorServico = new AdministradorServico(context);
-
-        // Act
-        administradorServico.Incluir(adm);
-        var admDoBanco = administradorServico.BuscaPorId(adm.Id);
+        // Act       
+        var admDoBanco = _administradorServico.BuscaPorId(adm.Id);
 
         // Assert
         Assert.AreEqual(1, admDoBanco?.Id);
     }
+
+    [TestMethod]
+    public void TestarIncluirAdministrador()
+    {
+        // Arrange
+        TruncarTabelaAdministradores();
+        var adm = CriarNovoAdministradorParaTeste();
+
+        // Act
+        _administradorServico.Incluir(adm);
+
+        // Assert
+        Assert.AreEqual(1, _administradorServico.Todos(1).Count());
+    }
+
+    [TestMethod]
+    public void TestarLoginSucessodministrador()
+    {
+        // Arrange
+        TruncarTabelaAdministradores();
+
+        var adm = CriarNovoAdministradorParaTeste();
+        _administradorServico.Incluir(adm);
+
+        // Act  
+        var login = new LoginDTO()
+        {
+            Email = adm.Email,
+            Senha = adm.Senha
+        };
+        var admDoBanco = _administradorServico.Login(login);
+
+        // Assert
+        Assert.AreNotEqual(null, admDoBanco);
+        Assert.AreEqual(1, admDoBanco?.Id);
+    }   
+
+    [TestMethod]
+    public void TestarLoginEmailNaoLocalizadoAdministrador()
+    {
+        // Arrange
+        TruncarTabelaAdministradores();
+
+        var adm = CriarNovoAdministradorParaTeste();
+        _administradorServico.Incluir(adm);
+
+        // Act  
+        var login = new LoginDTO()
+        {
+            Email = "outro@teste.com",
+            Senha = adm.Senha
+        };
+        var admDoBanco = _administradorServico.Login(login);
+
+        // Assert
+        Assert.AreEqual(null, admDoBanco);
+    }  
+
+    [TestMethod]
+    public void TestarLoginSenhaNaoLocalizadaAdministrador()
+    {
+        // Arrange
+        TruncarTabelaAdministradores();
+
+        var adm = CriarNovoAdministradorParaTeste();
+        _administradorServico.Incluir(adm);
+
+        // Act  
+        var login = new LoginDTO()
+        {
+            Email = adm.Email,
+            Senha = "XXXXX"
+        };
+        var admDoBanco = _administradorServico.Login(login);
+
+        // Assert
+        Assert.AreEqual(null, admDoBanco);
+    }          
 }
