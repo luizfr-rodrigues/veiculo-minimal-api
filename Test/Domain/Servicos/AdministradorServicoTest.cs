@@ -119,4 +119,23 @@ public class AdministradorServicoTest : ServicoBaseTest
         // Assert
         Assert.AreEqual(null, admDoBanco);
     }          
+
+    [TestMethod]
+    public void TestarTodosAdministrador()
+    {
+         // Arrange
+        TruncarTabelaAdministradores();
+
+        for (int i = 1; i <= 5; i++)
+        {
+            var adm = CriarNovoAdministradorParaTeste();
+            _administradorServico.Incluir(adm);            
+        }
+
+        // Act       
+        var listaAdms = _administradorServico.Todos(null);
+
+        // Assert
+        Assert.AreEqual(5, listaAdms.Count);
+    }
 }

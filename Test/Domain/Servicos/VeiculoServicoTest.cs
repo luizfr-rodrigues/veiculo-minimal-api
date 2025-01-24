@@ -86,6 +86,25 @@ namespace Test.Domain.Servicos
 
             // Assert
             Assert.AreEqual(1, _veiculoServico.Todos(1).Count());
-        }        
+        }    
+
+        [TestMethod]
+        public void TestarTodosVeiculo()
+        {
+            // Arrange
+            TruncarTabelaVeiculos();
+
+            for (int i = 1; i <= 5; i++)
+            {
+                var adm = CriarNovoVeiculoParaTeste();
+                _veiculoServico.Incluir(adm);            
+            }
+
+            // Act       
+            var listaVeiculos = _veiculoServico.Todos();
+
+            // Assert
+            Assert.AreEqual(5, listaVeiculos.Count);
+        }            
     }
 }
