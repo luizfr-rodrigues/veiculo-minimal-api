@@ -5,11 +5,9 @@ namespace veiculos_minimal_api.Infraestrutura.Db
 {
     public class DbContexto : DbContext
     {
-        private readonly IConfiguration _configuracaoAppSettings;
-
-        public DbContexto(IConfiguration configuracaoAppSettings)
+        public DbContexto(DbContextOptions<DbContexto> options) : base(options)
         {
-            _configuracaoAppSettings = configuracaoAppSettings;
+            
         }
 
         public DbSet<Administrador> Administradores { get; set; } = default!;
@@ -25,21 +23,6 @@ namespace veiculos_minimal_api.Infraestrutura.Db
                     Perfil = "Adm"
                 }
             );
-        }
-        
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            if(!optionsBuilder.IsConfigured)
-            {
-                var stringConexao = _configuracaoAppSettings.GetConnectionString("MySql")?.ToString();
-                if(!string.IsNullOrEmpty(stringConexao))
-                {
-                    optionsBuilder.UseMySql(
-                        stringConexao,
-                        ServerVersion.AutoDetect(stringConexao)
-                    );
-                }
-            }
-        }
+        }    
     }
 }

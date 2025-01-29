@@ -74,12 +74,22 @@ namespace veiculos_minimal_api
             });
 
             services.AddDbContext<DbContexto>(options => {
-                options.UseMySql(
-                    Configuration.GetConnectionString("MySql"),
-                    ServerVersion.AutoDetect(Configuration.GetConnectionString("MySql"))
-                );
-            });
+                var stringConexaoConfig = Configuration.GetConnectionString("MySql")?.ToString();
+                if(!string.IsNullOrEmpty(stringConexaoConfig))
+                {
+                    var stringConexao = stringConexaoConfig
+                        .Replace( "__DB_HOST__", Environment.GetEnvironmentVariable("DB_HOST_VEICULO_API") ?? "localhost" )
+                        .Replace( "__DB_NAME__", Environment.GetEnvironmentVariable("DB_NAME_VEICULO_API") ?? "minimal_api" )  
+                        .Replace( "__DB_USER__", Environment.GetEnvironmentVariable("DB_USER_VEICULO_API") )
+                        .Replace( "__DB_PASSWORD__", Environment.GetEnvironmentVariable("DB_PASSWORD_VEICULO_API") );
 
+                    options.UseMySql(
+                        stringConexao,
+                        ServerVersion.AutoDetect(stringConexao)
+                    );                
+                }
+            });
+                
             services.AddCors(options =>
             {
                 options.AddDefaultPolicy(
